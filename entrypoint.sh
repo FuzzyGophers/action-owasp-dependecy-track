@@ -5,6 +5,7 @@ DTRACK_URL=$1
 DTRACK_KEY=$2
 LANGUAGE=$3
 DELETE=$4
+GOLANG_VERSION=$5
 
 INSECURE="--insecure"
 #VERBOSE="--verbose"
@@ -101,7 +102,10 @@ case $LANGUAGE in
             exit 1
         fi
 
-        # Use main branch for now
+        # install Golang using snap
+        snap install go --classic --channel=$GOLANG_VERSION/stable
+
+        # Install cyclonedx-gomod module to generate SBOM. Use main branch for now
         go install github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@latest && cp ~/go/bin/cyclonedx-gomod /usr/bin/
         
         path="bom.xml"

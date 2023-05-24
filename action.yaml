@@ -22,30 +22,10 @@ inputs:
     description: 'Delete project'
     required: false
     default: 'false'
-  fail_on_critical:
-    description: 'Fail on Critical vulnerabilities'
+  golang_version:
+    description: 'Specify Golang version'
     required: false
-    default: 'false'
-  fail_on_high:
-    description: 'Fail on High vulnerabilities'
-    required: false
-    default: 'false'
-
-outputs:
-  riskscore:
-    description: 'String with the number of vulnerabilities found'
-  critical:
-    description: 'String with the number of vulnerabilities found'
-  high:
-    description: 'String with the number of vulnerabilities found'
-  medium:
-    description: 'String with the number of vulnerabilities found'
-  low:
-    description: 'String with the number of vulnerabilities found'
-  fail_on_critical:
-    description: 'String with the number of vulnerabilities found'
-  fail_on_high:
-    description: 'String with the number of vulnerabilities found'
+    default: '1.19'
 
 runs:
   using: 'docker'
@@ -55,5 +35,4 @@ runs:
     - ${{ inputs.key }}
     - ${{ inputs.language }}
     - ${{ inputs.delete }}
-    - ${{ inputs.fail_on_critical }}
-    - ${{ inputs.fail_on_high }}
+    - ${{ inputs.golang_version }}
