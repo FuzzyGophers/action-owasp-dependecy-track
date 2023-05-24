@@ -6,9 +6,8 @@ ENV DEBIAN_FRONTEND noninteractive
 # using --no-install-recommends to reduce image size
 
 RUN apt-get update \
-    && apt-get install --no-install-recommends -y git npm golang \
+    && apt-get install --no-install-recommends -y git \
     curl jq build-essential apt-transport-https unzip \
-    libc6 libgcc1 libgssapi-krb5-2 zlib1g \
     && apt-get update
 
 # TODO: Update binary to latest
