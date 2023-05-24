@@ -11,6 +11,11 @@ RUN apt-get update \
     libc6 libgcc1 libgssapi-krb5-2 zlib1g \
     && apt-get update
 
+# unmask and start snapd
+RUN systemctl unmask snapd.service
+RUN systemctl enable snapd.service
+RUN systemctl start snapd.service
+
 # TODO: Update binary to latest
 COPY cyclonedx-linux-x64 /usr/bin/cyclonedx-cli
 RUN chmod +x /usr/bin/cyclonedx-cli
