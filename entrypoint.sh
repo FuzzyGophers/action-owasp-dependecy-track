@@ -6,9 +6,6 @@ DTRACK_KEY=$2
 LANGUAGE=$3
 DELETE=$4
 
-FAIL_ON_CRITICAL=$5
-FAIL_ON_HIGH=$6
-
 INSECURE="--insecure"
 #VERBOSE="--verbose"
 
@@ -20,7 +17,9 @@ cd $GITHUB_WORKSPACE
 PROJECT=$(curl -X GET -G --data-urlencode "name=$GITHUB_REPOSITORY"  \
                          --data-urlencode "version=$GITHUB_SHA" \
                          "$DTRACK_URL/api/v1/project/lookup" -H  "accept: application/json" -H  "X-Api-Key: $DTRACK_KEY")
+
 PROJECT_EXISTS=$(echo $PROJECT | jq ".active")
+
 if [[ -n "$PROJECT_EXISTS" ]]; then
     PROJECT_UUID=$(echo $PROJECT | jq -r ".uuid")
 else
@@ -137,7 +136,7 @@ echo "[*] BoM file succesfully generated"
 # Cyclonedx CLI conversion
 echo "[*] Cyclonedx CLI conversion"
 
-# UPLOAD BoM to Dependency track server
+# UPLOAD SBOM to Dependency track server
 # TODO: Note autoCreate requires appropriate permissions and create variable
 echo "[*] Uploading BoM file to Dependency Track server"
 upload_bom=$(curl $INSECURE $VERBOSE -s --location --request POST $DTRACK_URL/api/v1/bom \
@@ -150,8 +149,8 @@ upload_bom=$(curl $INSECURE $VERBOSE -s --location --request POST $DTRACK_URL/ap
 
 
 token=$(echo $upload_bom | jq ".token" | tr -d "\"")
-echo "[*] BoM file succesfully uploaded with token $token"
 
+echo "[*] BoM file succesfully uploaded with token $token"
 
 if [ -z $token ]; then
     echo "[-]  The BoM file has not been successfully processed by OWASP Dependency Track"
@@ -159,6 +158,7 @@ if [ -z $token ]; then
 fi
 
 echo "[*] Checking BoM processing status"
+
 processing=$(curl $INSECURE $VERBOSE -s --location --request GET $DTRACK_URL/api/v1/bom/token/$token \
 --header "X-Api-Key: $DTRACK_KEY" | jq '.processing')
 
@@ -175,66 +175,6 @@ done
 
 echo "[*] OWASP Dependency Track processing completed"
 
-# wait to make sure the score is available, some errors found during tests w/o this wait
-echo "[*] Waiting to allow score generation"
-sleep 60
-
 echo "[*] Retrieving project information"
 project=$(curl  $INSECURE $VERBOSE -s --location --request GET "$DTRACK_URL/api/v1/project/lookup?name=$GITHUB_REPOSITORY&version=$GITHUB_SHA" \
 --header "X-Api-Key: $DTRACK_KEY")
-
-echo "-----PROJECT-------"
-echo $project
-echo "-------------------------"
-
-if [[ -n "$baseline_score" ]]; then
-    echo "Previous score was: $baseline_score"
-    echo "baselinescore=$baseline_score" >> $GITHUB_OUTPUT
-    previous_critical=$(echo $baseline_project | jq ".critical")
-    previous_high=$(echo $baseline_project | jq ".high")
-    previous_medium=$(echo $baseline_project | jq ".medium")
-    previous_low=$(echo $baseline_project | jq ".low")
-    previous_unassigned=$(echo $baseline_project | jq ".unassigned")
-fi
-
-project_metrics=$(curl  $INSECURE $VERBOSE -s --location --request GET -G "$DTRACK_URL/api/v1/metrics/project/$PROJECT_UUID/current" \
-                    --header "X-Api-Key: $DTRACK_KEY")
-project_uuid=$(echo $project | jq ".uuid" | tr -d "\"")
-risk_score=$(echo $project | jq ".lastInheritedRiskScore")
-critical=$(echo $project_metrics | jq ".critical")
-high=$(echo $project_metrics | jq ".high")
-medium=$(echo $project_metrics | jq ".medium")
-low=$(echo $project_metrics | jq ".low")
-unassigned=$(echo $project_metrics | jq ".unassigned")
-
-echo "-----PROJECT METRICS-----"
-echo $project_metrics
-echo "-------------------------"
-
-echo "riskscore=$risk_score" >> $GITHUB_OUTPUT
-echo "critical=$critical" >> $GITHUB_OUTPUT
-echo "high=$high" >> $GITHUB_OUTPUT
-echo "medium=$medium" >> $GITHUB_OUTPUT
-echo "low=$low" >> $GITHUB_OUTPUT
-echo "unassigned=$unassigned" >> $GITHUB_OUTPUT
-echo "previouscritical=$previous_critical" >> $GITHUB_OUTPUT
-echo "previoushigh=$previous_high" >> $GITHUB_OUTPUT
-echo "previousmedium=$previous_medium" >> $GITHUB_OUTPUT
-echo "previouslow=$previous_low" >> $GITHUB_OUTPUT
-echo "previousunassigned=$previous_unassigned" >> $GITHUB_OUTPUT
-echo "project_url=$DTRACK_URL/projects/$PROJECT_UUID" >> $GITHUB_OUTPUT
-echo "fail_on_critical=$FAIL_ON_CRITICAL" >> $GITHUB_OUTPUT
-echo "fail_on_high=$FAIL_ON_HIGH" >> $GITHUB_OUTPUT
-
-cat $GITHUB_OUTPUT
-if [[ $critical -gt 0 ]] && [[ $FAIL_ON_CRITICAL == "true" ]];
-then
-    echo 'Failing due to presence of criticals'
-    exit 1
-fi
-
-if [[ $high -gt 0 ]] && [[ $FAIL_ON_HIGH == "true" ]];
-then
-    echo 'Failing due to presence of highs'
-    exit 1
-fi
