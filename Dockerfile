@@ -1,4 +1,4 @@
-FROM golang:latest-alpine
+FROM golang:1.19.9-alpine
 
 RUN apk add --no-cache --virtual .build-deps bash curl \
     git jq musl-dev openssl
