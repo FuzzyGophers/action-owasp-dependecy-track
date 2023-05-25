@@ -51,8 +51,10 @@ fi
 case $LANGUAGE in
     "nodejs")
         lscommand=$(ls)
-        echo "[*] Processing NodeJS BoM"
-        apt-get install --no-install-recommends -y nodejs
+        echo "[*] Processing NodeJS SBOM..."
+        
+        apk add --update npm
+
         export NVM_DIR="$HOME/.nvm" && (
         git clone https://github.com/nvm-sh/nvm.git "$NVM_DIR"
         cd "$NVM_DIR"
@@ -71,19 +73,21 @@ case $LANGUAGE in
             nvm use default
         fi
         npm install
-        npm audit fix --force --production
+        #npm audit fix --force --production
         if [ ! $? = 0 ]; then
             echo "[-] Error executing npm install. Stopping the action!"
             exit 1
         fi
-        npm install -g @cyclonedx/cyclonedx-npm
+
+        npm install --global @cyclonedx/cyclonedx-npm
+
         path="bom.xml"
         cyclonedx-npm --help
         BoMResult=$(cyclonedx-npm --output-format XML --ignore-npm-errors --short-PURLs --output-file bom.xml)
         ;;
 
     "python")
-        echo "[*]  Processing Python BoM"
+        echo "[*]  Processing Python SBOM..."
         apt-get install --no-install-recommends -y python3 python3-pip
         freeze=$(pip freeze > requirements.txt)
         if [ ! $? = 0 ]; then
@@ -96,7 +100,7 @@ case $LANGUAGE in
         ;;
 
     "golang")
-        echo "[*]  Processing Golang BoM"
+        echo "[*]  Processing Go SBOM..."
         if [ ! $? = 0 ]; then
             echo "[-] Error executing go build. Stopping the action!"
             exit 1
@@ -112,18 +116,6 @@ case $LANGUAGE in
         # TODO: make licenses configurable
         BoMResult=$(cyclonedx-gomod mod -licenses -type library -output bom.xml)
         ;;
-
-    "java")
-        echo "[*]  Processing Java BoM"
-        if [ ! $? = 0 ]; then
-            echo "[-] Error executing Java build. Stopping the action!"
-            exit 1
-        fi
-        apt-get install --no-install-recommends -y build-essential default-jdk maven
-        path="target/bom.xml"
-        BoMResult=$(mvn compile)
-        ;;
-
     *)
         "[-] Project type not supported: $LANGUAGE"
         exit 1
@@ -135,14 +127,13 @@ baseline_project=$(curl  $INSECURE $VERBOSE -s --location --request GET -G "$DTR
 
 baseline_score=$(echo $baseline_project | jq ".inheritedRiskScore" 2>/dev/nulll)
 
-echo "[*] BoM file succesfully generated"
-
-# Cyclonedx CLI conversion
-echo "[*] Cyclonedx CLI conversion"
+echo "[*] SBOM file succesfully generated"
 
 # UPLOAD SBOM to Dependency track server
 # TODO: Note autoCreate requires appropriate permissions and create variable
-echo "[*] Uploading BoM file to Dependency Track server"
+
+echo "[*] Uploading SBOM to Dependency Track server"
+
 upload_bom=$(curl $INSECURE $VERBOSE -s --location --request POST $DTRACK_URL/api/v1/bom \
 --header "X-Api-Key: $DTRACK_KEY" \
 --header "Content-Type: multipart/form-data" \
@@ -154,14 +145,14 @@ upload_bom=$(curl $INSECURE $VERBOSE -s --location --request POST $DTRACK_URL/ap
 
 token=$(echo $upload_bom | jq ".token" | tr -d "\"")
 
-echo "[*] BoM file succesfully uploaded with token $token"
+echo "[*] SBOM succesfully uploaded with token $token"
 
 if [ -z $token ]; then
-    echo "[-]  The BoM file has not been successfully processed by OWASP Dependency Track"
+    echo "[-]  The SBOM has not been successfully processed by OWASP Dependency Track"
     exit 1
 fi
 
-echo "[*] Checking BoM processing status"
+echo "[*] Checking SBOM processing status"
 
 processing=$(curl $INSECURE $VERBOSE -s --location --request GET $DTRACK_URL/api/v1/bom/token/$token \
 --header "X-Api-Key: $DTRACK_KEY" | jq '.processing')
@@ -172,12 +163,12 @@ while [ $processing = true ]; do
     processing=$(curl  $INSECURE $VERBOSE -s --location --request GET $DTRACK_URL/api/v1/bom/token/$token \
 --header "X-Api-Key: $DTRACK_KEY" | jq '.processing')
     if [ $((++c)) -eq 50 ]; then
-        echo "[-]  Timeout while waiting for processing result. Please check the OWASP Dependency Track status."
+        echo "[-]  Timeout while waiting for processing result. Please check the Dependency Track status."
         exit 1
     fi
 done
 
-echo "[*] OWASP Dependency Track processing completed"
+echo "[*] Dependency Track processing completed"
 
 echo "[*] Retrieving project information"
 project=$(curl  $INSECURE $VERBOSE -s --location --request GET "$DTRACK_URL/api/v1/project/lookup?name=$GITHUB_REPOSITORY&version=$GITHUB_SHA" \
