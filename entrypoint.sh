@@ -6,6 +6,7 @@ DTRACK_KEY=$2
 LANGUAGE=$3
 DELETE=$4
 GOLANG_VERSION=$5
+NPM_TOKEN=$6
 
 INSECURE="--insecure"
 #VERBOSE="--verbose"
@@ -55,29 +56,29 @@ case $LANGUAGE in
         
         apk add --update npm
 
-        #export NVM_DIR="$HOME/.nvm" && (
-        #git clone https://github.com/nvm-sh/nvm.git "$NVM_DIR"
-        #cd "$NVM_DIR"
-        #git checkout `git describe --abbrev=0 --tags --match "v[0-9]*" $(git rev-list --tags --max-count=1)`
-        #) && \. "$NVM_DIR/nvm.sh"
-        #grep -q 12 ".nvmrc"
-        #if [[ $? != 0 && -f ".nvmrc" ]];
-        #then
-        #    echo "Using .nvmrc file"
-        #    nvm install
-        #    nvm use
-        #else
-        #    echo "Installing 16.14.2"
-        #    nvm install 16.14.2
-        #    nvm alias default 16.14.2
-        #    nvm use default
-        #fi
-        #npm install
-        #npm audit fix --force --production
-        #if [ ! $? = 0 ]; then
-        #    echo "[-] Error executing npm install. Stopping the action!"
-        #    exit 1
-        #fi
+        export NVM_DIR="$HOME/.nvm" && (
+        git clone https://github.com/nvm-sh/nvm.git "$NVM_DIR"
+        cd "$NVM_DIR"
+        git checkout `git describe --abbrev=0 --tags --match "v[0-9]*" $(git rev-list --tags --max-count=1)`
+        ) && \. "$NVM_DIR/nvm.sh"
+        grep -q 12 ".nvmrc"
+        if [[ $? != 0 && -f ".nvmrc" ]];
+        then
+            echo "Using .nvmrc file"
+            nvm install
+            nvm use
+        else
+            echo "Installing 16.14.2"
+            nvm install 16.14.2
+            nvm alias default 16.14.2
+            nvm use default
+        fi
+        npm install
+        npm audit fix --force --production
+        if [ ! $? = 0 ]; then
+            echo "[-] Error executing npm install. Stopping the action!"
+            exit 1
+        fi
 
         npm install --global @cyclonedx/cyclonedx-npm
 

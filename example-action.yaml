@@ -26,9 +26,6 @@ jobs:
         uses:  FuzzyGophers/action-owasp-dependecy-track@main
         with:
           url: 'https://deptrack.example.com'
-          key: '${{ secrets.SECRET_OWASP_DT_KEY }}'
+          key: '${{ secrets.SECRET_OWASP_DT_KEY_BACKEND }}'
+          npm_token: '${{ secrets.SECRET_OWASP_NPM_TOKEN }}'
           language: 'golang'
-      
-      # Show the risk score output 
-      - name: Get the output time
-        run: echo "The risk score of the project is ${{ steps.riskscoreFromDT.outputs.riskscore }}"
