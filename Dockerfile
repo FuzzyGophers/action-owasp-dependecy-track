@@ -1,6 +1,7 @@
-FROM alpine:latest
+FROM golang:latest-alpine
 
-RUN apk add --no-cache --virtual .build-deps bash gcc musl-dev openssl git
+RUN apk add --no-cache --virtual .build-deps bash curl \
+    git jq musl-dev openssl
 
 # TODO: Update binary to latest
 COPY cyclonedx-linux-x64 /usr/bin/cyclonedx-cli
