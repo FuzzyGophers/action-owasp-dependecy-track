@@ -106,7 +106,7 @@ case $LANGUAGE in
         go version
         
         # Install cyclonedx-gomod module to generate SBOM. Use main branch for now
-        go install github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@latest && cp ~/go/bin/cyclonedx-gomod /usr/bin/
+        go install github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@latest
         
         path="bom.xml"
         # TODO: make licenses configurable
