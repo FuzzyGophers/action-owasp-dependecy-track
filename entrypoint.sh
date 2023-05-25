@@ -74,7 +74,7 @@ case $LANGUAGE in
         #    nvm alias default 16.14.2
         #    nvm use default
         #fi
-        npm install
+        npm install --legacy-peer-deps
         #npm audit fix --force --production
         if [ ! $? = 0 ]; then
             echo "[-] Error executing npm install. Stopping the action!"
