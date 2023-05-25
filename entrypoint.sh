@@ -62,7 +62,7 @@ case $LANGUAGE in
         #git checkout `git describe --abbrev=0 --tags --match "v[0-9]*" $(git rev-list --tags --max-count=1)`
         #) && \. "$NVM_DIR/nvm.sh"
         #grep -q 12 ".nvmrc"
-        echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+        echo "//npm.pkg.github.com/:_authToken=${NPM_TOKEN}" > ~/.npmrc
         #if [[ $? != 0 && -f ".nvmrc" ]];
         #then
         #    echo "Using .nvmrc file"
