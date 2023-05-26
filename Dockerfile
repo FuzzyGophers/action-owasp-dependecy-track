@@ -1,7 +1,7 @@
 FROM golang:1.19.9-alpine
 
 RUN apk add --no-cache --virtual .build-deps bash curl \
-    git jq musl-dev openssl python3
+    git jq make musl-dev openssl python3
 
 RUN ln -sf python3 /usr/bin/python
 
