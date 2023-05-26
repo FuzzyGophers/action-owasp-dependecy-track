@@ -54,7 +54,7 @@ case $LANGUAGE in
         lscommand=$(ls)
         echo "[*] Processing NodeJS SBOM..."
         
-        apk add --update npm
+        apk add --update nodejs npm
 
         #export NVM_DIR="$HOME/.nvm" && (
         #git clone https://github.com/nvm-sh/nvm.git "$NVM_DIR"
