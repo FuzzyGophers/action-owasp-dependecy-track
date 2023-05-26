@@ -1,7 +1,7 @@
 FROM golang:1.19.9-alpine
 
 RUN apk add --no-cache --virtual .build-deps bash binutils ca-certificates coreutils curl \
-    findutils g++ gcc gcompat git grep jq libc6-compat libgcc linux-headers make musl-dev ncurses openssl python3 \
+    findutils g++ gcc gcompat git grep jq libc6-compat libstdc++6 libgcc linux-headers make musl-dev ncurses openssl python3 \
     util-linux
 
 RUN ln -sf python3 /usr/bin/python
