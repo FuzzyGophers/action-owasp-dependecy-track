@@ -30,6 +30,10 @@ inputs:
     description: 'Provide NPM token for installing packages'
     required: false
     default: 'USEAVALIDKEY'
+  node_version:
+    description: 'Specify NodeJS version'
+    required: false
+    default: '16.11.0'
 
 runs:
   using: 'docker'
@@ -41,3 +45,4 @@ runs:
     - ${{ inputs.delete }}
     - ${{ inputs.golang_version }}
     - ${{ inputs.npm_token }}
+    - ${{ inputs.node_version }}
