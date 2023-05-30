@@ -113,7 +113,7 @@ case $LANGUAGE in
         
         path="bom.xml"
         # TODO: make licenses configurable
-        BoMResult=$(cyclonedx-gomod mod -licenses -type library -output bom.xml)
+        BoMResult=$(cyclonedx-gomod mod -licenses=true -type library -output bom.xml)
         ;;
     *)
         "[-] Project type not supported: $LANGUAGE"
