@@ -1,4 +1,4 @@
-FROM golang:1.19.9-alpine
+FROM golang:1.20.4-alpine
 
 RUN apk add --no-cache --virtual .build-deps bash binutils ca-certificates coreutils curl \
     findutils g++ gcc gcompat git grep jq libc6-compat libstdc++6 libgcc linux-headers make \
