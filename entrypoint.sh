@@ -81,8 +81,8 @@ case $LANGUAGE in
 
     "python")
         echo "[*]  Processing Python SBOM..."
-        # output and input filenames must be distinct or we get an infinite loop
 
+        # output and input filenames must be distinct or we get an infinite loop
         find . -name "requirements.txt" -exec cat > test.txt {} +
         mv test.txt requirements.txt
 
@@ -95,7 +95,7 @@ case $LANGUAGE in
 
         path="bom.xml"
 
-        BoMResult=$(cyclonedx-py -o bom.xml)
+        BoMResult=$(cyclonedx-py -r -i requirements.txt -o bom.xml)
         ;;
 
     "golang")
