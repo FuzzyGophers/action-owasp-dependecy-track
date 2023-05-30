@@ -94,7 +94,7 @@ case $LANGUAGE in
         pip install cyclonedx-bom
 
         path="bom.xml"
-
+        # this may need to be modified to use -e switch for license information
         BoMResult=$(cyclonedx-py -r -i requirements.txt -o bom.xml)
         ;;
 
