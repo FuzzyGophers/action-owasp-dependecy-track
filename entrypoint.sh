@@ -5,20 +5,18 @@ DTRACK_URL=$1
 DTRACK_KEY=$2
 LANGUAGE=$3
 DELETE=$4
-GOLANG_VERSION=$5
-NPM_TOKEN=$6
-NODE_VERSION=$7
+NPM_TOKEN=$5
+NODE_VERSION=$6
 
 INSECURE="--insecure"
 #VERBOSE="--verbose"
 
 # Access directory where GitHub will mount the repository code
-# $GITHUB_ variables are directly accessible in the script
 cd $GITHUB_WORKSPACE
 
 # Run check for delete variable first so that install doesn't need to be run
 PROJECT=$(curl -X GET -G --data-urlencode "name=$GITHUB_REPOSITORY"  \
-                         --data-urlencode "version=$GITHUB_SHA" \
+                         --data-urlencode "version=$GITHUB_BASE_REF" \
                          "$DTRACK_URL/api/v1/project/lookup" -H  "accept: application/json" -H  "X-Api-Key: $DTRACK_KEY")
 
 PROJECT_EXISTS=$(echo $PROJECT | jq ".active")
@@ -27,7 +25,7 @@ if [[ -n "$PROJECT_EXISTS" ]]; then
     PROJECT_UUID=$(echo $PROJECT | jq -r ".uuid")
 else
     PROJECT_UUID=$(curl \
-        -d "{  \"name\": \"$GITHUB_REPOSITORY\",  \"version\": \"$GITHUB_SHA\"}" \
+        -d "{  \"name\": \"$GITHUB_REPOSITORY\",  \"version\": \"$GITHUB_BASE_REF\"}" \
         -X PUT "$DTRACK_URL/api/v1/project" \
         -H  "accept: application/json" \
         -H  "Content-Type: application/json" \
@@ -70,34 +68,40 @@ case $LANGUAGE in
         npm install
 
         if [ ! $? = 0 ]; then
-            echo "[-] Error install node modules. Running away!"
+            echo "[-] Error installing node modules. Pop smoke!"
             exit 1
         fi
 
         npm install --global @cyclonedx/cyclonedx-npm
 
         path="bom.xml"
-        cyclonedx-npm --help
+ 
         BoMResult=$(cyclonedx-npm --output-format XML --ignore-npm-errors --short-PURLs --output-file bom.xml)
         ;;
 
     "python")
         echo "[*]  Processing Python SBOM..."
-        apt-get install --no-install-recommends -y python3 python3-pip
-        freeze=$(pip freeze > requirements.txt)
+        # output and input filenames must be distinct or we get an infinite loop
+
+        find . -name "requirements.txt" -exec cat > test.txt {} +
+        mv test.txt requirements.txt
+
         if [ ! $? = 0 ]; then
-            echo "[-] Error executing pip freeze to get a requirements.txt with frozen parameters. Stopping the action!"
+            echo "[-] Error concatenating requirements files in repo. Pop smoke!"
             exit 1
         fi
+
         pip install cyclonedx-bom
+
         path="bom.xml"
+
         BoMResult=$(cyclonedx-py -o bom.xml)
         ;;
 
     "golang")
         echo "[*]  Processing Go SBOM..."
         if [ ! $? = 0 ]; then
-            echo "[-] Error executing go build. Stopping the action!"
+            echo "[-] Error executing go build. Pop smoke!"
             exit 1
         fi
 
@@ -135,7 +139,7 @@ upload_bom=$(curl $INSECURE $VERBOSE -s --location --request POST $DTRACK_URL/ap
 --header "Content-Type: multipart/form-data" \
 --form "autoCreate=true" \
 --form "projectName=$GITHUB_REPOSITORY" \
---form "projectVersion=$GITHUB_SHA" \
+--form "projectVersion=$GITHUB_BASE_REF" \
 --form "bom=@bom.xml")
 
 
@@ -144,7 +148,7 @@ token=$(echo $upload_bom | jq ".token" | tr -d "\"")
 echo "[*] SBOM succesfully uploaded with token $token"
 
 if [ -z $token ]; then
-    echo "[-]  The SBOM has not been successfully processed by OWASP Dependency Track"
+    echo "[-]  The SBOM has not been successfully processed by OWASP Dependency Track. Pop smoke!"
     exit 1
 fi
 
@@ -167,5 +171,5 @@ done
 echo "[*] Dependency Track processing completed"
 
 echo "[*] Retrieving project information"
-project=$(curl  $INSECURE $VERBOSE -s --location --request GET "$DTRACK_URL/api/v1/project/lookup?name=$GITHUB_REPOSITORY&version=$GITHUB_SHA" \
+project=$(curl  $INSECURE $VERBOSE -s --location --request GET "$DTRACK_URL/api/v1/project/lookup?name=$GITHUB_REPOSITORY&version=$GITHUB_BASE_REF" \
 --header "X-Api-Key: $DTRACK_KEY")

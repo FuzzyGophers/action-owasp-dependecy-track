@@ -22,10 +22,6 @@ inputs:
     description: 'Delete project'
     required: false
     default: 'false'
-  golang_version:
-    description: 'Specify Golang version'
-    required: false
-    default: '1.19'
   npm_token:
     description: 'Provide NPM token for installing packages'
     required: false
@@ -43,6 +39,5 @@ runs:
     - ${{ inputs.key }}
     - ${{ inputs.language }}
     - ${{ inputs.delete }}
-    - ${{ inputs.golang_version }}
     - ${{ inputs.npm_token }}
     - ${{ inputs.node_version }}

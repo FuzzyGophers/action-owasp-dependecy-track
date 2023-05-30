@@ -1,5 +1,3 @@
-# This is a basic workflow to help you get started with Actions
-
 name: CI
 
 # Controls when the action will run. 
@@ -22,7 +20,7 @@ jobs:
       
       # Generates a BoM and uploads it to OWASP Dependency Track
       - name: Generates BoM and upload to OWASP DTrack
-        id: riskscoreFromDT
+        id: generateSBOM
         uses:  FuzzyGophers/action-owasp-dependecy-track@main
         with:
           url: 'https://deptrack.example.com'
