@@ -130,9 +130,6 @@ case $LANGUAGE in
         ;;
 esac
 
-baseline_project=$(curl $INSECURE $VERBOSE -s --location --request GET -G "$DTRACK_URL/api/v1/metrics/project/$PROJECT_UUID/current" \
-    --header "X-Api-Key: $DTRACK_KEY")
-
 echo "[*] SBOM file succesfully generated"
 
 # UPLOAD SBOM to Dependency track server
@@ -150,30 +147,9 @@ upload_bom=$(curl $INSECURE $VERBOSE -s --location --request POST $DTRACK_URL/ap
 
 token=$(echo $upload_bom | jq ".token" | tr -d "\"")
 
-echo "[*] SBOM succesfully uploaded with token $token"
-
 if [ -z $token ]; then
     echo "[-]  The SBOM has not been successfully processed by OWASP Dependency Track. Pop smoke!"
     exit 1
+else
+    echo "[*] SBOM succesfully uploaded with token: $token"
 fi
-
-echo "[*] Checking SBOM processing status"
-
-processing=$(curl $INSECURE $VERBOSE -s --location --request GET $DTRACK_URL/api/v1/bom/token/$token \
---header "X-Api-Key: $DTRACK_KEY" | jq '.processing')
-
-while [ $processing = true ]; do
-    sleep 5
-    processing=$(curl $INSECURE $VERBOSE -s --location --request GET $DTRACK_URL/api/v1/bom/token/$token \
---header "X-Api-Key: $DTRACK_KEY" | jq '.processing')
-    if [ $((++c)) -eq 50 ]; then
-        echo "[-]  Timeout while waiting for processing result. Please check the Dependency Track status."
-        exit 1
-    fi
-done
-
-echo "[*] Dependency Track processing completed!"
-
-echo "[*] Retrieving project information"
-project=$(curl $INSECURE $VERBOSE -s --location --request GET "$DTRACK_URL/api/v1/project/lookup?name=$GITHUB_REPOSITORY&version=$GITHUB_BASE_REF" \
---header "X-Api-Key: $DTRACK_KEY")
