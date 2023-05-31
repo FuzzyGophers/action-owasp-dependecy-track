@@ -1,5 +1,4 @@
 #!/bin/bash
-# set -x
 
 DTRACK_URL=$1
 DTRACK_KEY=$2
@@ -134,16 +133,14 @@ esac
 baseline_project=$(curl $INSECURE $VERBOSE -s --location --request GET -G "$DTRACK_URL/api/v1/metrics/project/$PROJECT_UUID/current" \
     --header "X-Api-Key: $DTRACK_KEY")
 
-baseline_score=$(echo $baseline_project | jq ".inheritedRiskScore" 2>/dev/nulll)
-
 echo "[*] SBOM file succesfully generated"
 
 # UPLOAD SBOM to Dependency track server
 # TODO: Note autoCreate requires appropriate permissions and create variable
 
-echo "[*] Uploading SBOM to Dependency Track server"
+echo "[*] Uploading SBOM to Dependency Track server..."
 
-upload_bom=$(curl  $INSECURE $VERBOSE -s --location --request POST $DTRACK_URL/api/v1/bom \
+upload_bom=$(curl $INSECURE $VERBOSE -s --location --request POST $DTRACK_URL/api/v1/bom \
 --header "X-Api-Key: $DTRACK_KEY" \
 --header "Content-Type: multipart/form-data" \
 --form "autoCreate=true" \
@@ -151,11 +148,7 @@ upload_bom=$(curl  $INSECURE $VERBOSE -s --location --request POST $DTRACK_URL/a
 --form "projectVersion=$GITHUB_BASE_REF" \
 --form "bom=@bom.xml")
 
-echo $upload_bom
-
 token=$(echo $upload_bom | jq ".token" | tr -d "\"")
-
-echo $token
 
 echo "[*] SBOM succesfully uploaded with token $token"
 
@@ -169,10 +162,9 @@ echo "[*] Checking SBOM processing status"
 processing=$(curl $INSECURE $VERBOSE -s --location --request GET $DTRACK_URL/api/v1/bom/token/$token \
 --header "X-Api-Key: $DTRACK_KEY" | jq '.processing')
 
-
 while [ $processing = true ]; do
     sleep 5
-    processing=$(curl  $INSECURE $VERBOSE -s --location --request GET $DTRACK_URL/api/v1/bom/token/$token \
+    processing=$(curl $INSECURE $VERBOSE -s --location --request GET $DTRACK_URL/api/v1/bom/token/$token \
 --header "X-Api-Key: $DTRACK_KEY" | jq '.processing')
     if [ $((++c)) -eq 50 ]; then
         echo "[-]  Timeout while waiting for processing result. Please check the Dependency Track status."
@@ -180,8 +172,8 @@ while [ $processing = true ]; do
     fi
 done
 
-echo "[*] Dependency Track processing completed"
+echo "[*] Dependency Track processing completed!"
 
 echo "[*] Retrieving project information"
-project=$(curl  $INSECURE $VERBOSE -s --location --request GET "$DTRACK_URL/api/v1/project/lookup?name=$GITHUB_REPOSITORY&version=$GITHUB_BASE_REF" \
+project=$(curl $INSECURE $VERBOSE -s --location --request GET "$DTRACK_URL/api/v1/project/lookup?name=$GITHUB_REPOSITORY&version=$GITHUB_BASE_REF" \
 --header "X-Api-Key: $DTRACK_KEY")
