@@ -84,13 +84,13 @@ case $LANGUAGE in
     "python")
         echo "[*] Installing and configuring pyenv..."
         
-        curl https://pyenv.run | bash
-        export PYENV_ROOT="$HOME/.pyenv" >> ~/.profile
-        command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH" >> ~/.profile
-        eval "$(pyenv init -)" >> ~/.profile
+        #curl https://pyenv.run | bash
+        #export PYENV_ROOT="$HOME/.pyenv" >> ~/.profile
+        #command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH" >> ~/.profile
+        #eval "$(pyenv init -)" >> ~/.profile
 
-        pyenv install $PYTHON_VERSION
-        pyenv global $PYTHON_VERSION
+        #pyenv install $PYTHON_VERSION
+        #pyenv global $PYTHON_VERSION
 
         echo "[*] Finding all the requirements.txt files..."
         # output and input filenames must be distinct or we get an infinite loop
@@ -126,7 +126,7 @@ case $LANGUAGE in
     *)
         "[-] Project type not supported: $LANGUAGE"
 
-        #exit 1
+        exit 1
         ;;
 esac
 
