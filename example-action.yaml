@@ -25,7 +25,7 @@ jobs:
       - uses: actions/checkout@v2 
       
       # Generates a BoM and uploads it to OWASP Dependency Track
-      - name: Generates SBOM and upload to OWASP Dependency Track
+      - name: Generates SBOM and uploads to OWASP Dependency Track
         id: generateSBOM
         uses:  FuzzyGophers/action-owasp-dependecy-track@main
         with:
