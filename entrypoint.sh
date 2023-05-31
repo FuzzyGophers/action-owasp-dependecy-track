@@ -153,7 +153,7 @@ upload_bom=$(curl $INSECURE $VERBOSE -s --location --request POST $DTRACK_URL/ap
 
 
 token=$(echo $upload_bom | jq ".token" | tr -d "\"")
-
+echo $token
 echo "[*] SBOM succesfully uploaded with token $token"
 
 if [ -z $token ]; then
