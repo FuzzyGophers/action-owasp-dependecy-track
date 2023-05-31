@@ -151,9 +151,12 @@ upload_bom=$(curl $INSECURE $VERBOSE -s --location --request POST $DTRACK_URL/ap
 --form "projectVersion=$GITHUB_BASE_REF" \
 --form "bom=@bom.xml")
 
+echo $upload_bom
 
 token=$(echo $upload_bom | jq ".token" | tr -d "\"")
+
 echo $token
+
 echo "[*] SBOM succesfully uploaded with token $token"
 
 if [ -z $token ]; then
