@@ -7,6 +7,7 @@ LANGUAGE=$3
 DELETE=$4
 NPM_TOKEN=$5
 NODE_VERSION=$6
+PYTHON_VERSION=$7
 
 INSECURE="--insecure"
 #VERBOSE="--verbose"
@@ -50,14 +51,14 @@ fi
 
 case $LANGUAGE in
     "nodejs")
-        lscommand=$(ls)
-        echo "[*] Processing NodeJS SBOM..."
+        echo "[*] Installing and configuring nvm..."
 
         # install nvm
         curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
         export NVM_DIR="$HOME/.nvm"
         [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-        
+
+        echo "[*] Configuring .npmrc with token..."
         echo "//npm.pkg.github.com/:_authToken=${NPM_TOKEN}" > ~/.npmrc
 
         echo "[*] Installing node-${NODE_VERSION}"
@@ -65,6 +66,7 @@ case $LANGUAGE in
         nvm alias default ${NODE_VERSION}
         nvm use default
 
+        echo "[*] Installing all the modules..."
         npm install
 
         if [ ! $? = 0 ]; then
@@ -72,6 +74,7 @@ case $LANGUAGE in
             exit 1
         fi
 
+        echo "[*] Processing NodeJS SBOM..."
         npm install --global @cyclonedx/cyclonedx-npm
 
         path="bom.xml"
@@ -80,8 +83,17 @@ case $LANGUAGE in
         ;;
 
     "python")
-        echo "[*]  Processing Python SBOM..."
+        echo "[*] Installing and configuring pyenv..."
+        
+        curl https://pyenv.run | bash
+        export PYENV_ROOT="$HOME/.pyenv" >> ~/.profile
+        command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH" >> ~/.profile
+        eval "$(pyenv init -)" >> ~/.profile
 
+        pyenv install $PYTHON_VERSION
+        pyenv global $PYTHON_VERSION
+
+        echo "[*] Finding all the requirements.txt files..."
         # output and input filenames must be distinct or we get an infinite loop
         find . -name "requirements.txt" -exec cat > test.txt {} +
         mv test.txt requirements.txt
@@ -91,6 +103,8 @@ case $LANGUAGE in
             exit 1
         fi
 
+        echo "[*] Processing Python SBOM..."
+        
         pip install cyclonedx-bom
 
         path="bom.xml"
@@ -99,14 +113,9 @@ case $LANGUAGE in
         ;;
 
     "golang")
-        echo "[*]  Processing Go SBOM..."
-        if [ ! $? = 0 ]; then
-            echo "[-] Error executing go build. Pop smoke!"
-            exit 1
-        fi
+        echo "[*] Go version: $(go version)"
 
-        echo "[*] Go version:"
-        go version
+        echo "[*]  Processing Go SBOM..."
         
         # Install cyclonedx-gomod module to generate SBOM. Use main branch for now
         go install github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@latest
@@ -122,7 +131,7 @@ case $LANGUAGE in
         ;;
 esac
 
-baseline_project=$(curl  $INSECURE $VERBOSE -s --location --request GET -G "$DTRACK_URL/api/v1/metrics/project/$PROJECT_UUID/current" \
+baseline_project=$(curl $INSECURE $VERBOSE -s --location --request GET -G "$DTRACK_URL/api/v1/metrics/project/$PROJECT_UUID/current" \
     --header "X-Api-Key: $DTRACK_KEY")
 
 baseline_score=$(echo $baseline_project | jq ".inheritedRiskScore" 2>/dev/nulll)
