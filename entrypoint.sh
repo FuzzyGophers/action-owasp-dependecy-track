@@ -136,7 +136,7 @@ echo "[*] SBOM file succesfully generated"
 
 echo "[*] Uploading SBOM to Dependency Track server..."
 
-upload_bom=$(curl $INSECURE --verbose -s --location --request POST $DTRACK_URL/api/v1/bom \
+upload_bom=$(curl $INSECURE -s --location --request POST $DTRACK_URL/api/v1/bom \
 --header "X-Api-Key: $DTRACK_KEY" \
 --header "Content-Type: multipart/form-data" \
 --form "autoCreate=true" \
