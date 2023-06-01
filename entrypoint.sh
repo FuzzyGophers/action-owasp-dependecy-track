@@ -6,7 +6,7 @@ LANGUAGE=$3
 DELETE=$4
 NPM_TOKEN=$5
 NODE_VERSION=$6
-PYTHON_VERSION=$7
+#PY_VERSION=$7
 
 INSECURE="--insecure"
 #VERBOSE="--verbose"
@@ -84,13 +84,13 @@ case $LANGUAGE in
     "python")
         echo "[*] Installing and configuring pyenv..."
         
-        #curl https://pyenv.run | bash
-        #export PYENV_ROOT="$HOME/.pyenv" >> ~/.profile
-        #command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH" >> ~/.profile
-        #eval "$(pyenv init -)" >> ~/.profile
+        curl https://pyenv.run | bash
+        export PYENV_ROOT="$HOME/.pyenv" >> ~/.profile
+        command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH" >> ~/.profile
+        eval "$(pyenv init -)" >> ~/.profile
 
-        #pyenv install $PYTHON_VERSION
-        #pyenv global $PYTHON_VERSION
+        pyenv install 3.9.7
+        pyenv global 3.9.7
 
         echo "[*] Finding all the requirements.txt files..."
         # output and input filenames must be distinct or we get an infinite loop
