@@ -9,7 +9,6 @@ NODE_VERSION=$6
 #PY_VERSION=$7
 
 INSECURE="--insecure"
-#VERBOSE="--verbose"
 
 # Access directory where GitHub will mount the repository code
 cd $GITHUB_WORKSPACE
@@ -137,7 +136,9 @@ echo "[*] SBOM file succesfully generated"
 
 echo "[*] Uploading SBOM to Dependency Track server..."
 
-upload_bom=$(curl $INSECURE $VERBOSE -s --location --request POST $DTRACK_URL/api/v1/bom \
+set -x
+
+upload_bom=$(curl $INSECURE --verbose -s --location --request POST $DTRACK_URL/api/v1/bom \
 --header "X-Api-Key: $DTRACK_KEY" \
 --header "Content-Type: multipart/form-data" \
 --form "autoCreate=true" \
