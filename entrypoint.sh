@@ -141,7 +141,7 @@ upload_bom=$(curl $INSECURE --verbose -s --location --request POST $DTRACK_URL/a
 --header "Content-Type: multipart/form-data" \
 --form "autoCreate=true" \
 --form "projectName=$GITHUB_REPOSITORY" \
---form "projectVersion=$GITHUB_BASE_REF" \
+--form "projectVersion=$LANGUAGE" \
 --form "bom=@bom.xml")
 
 token=$(echo $upload_bom | jq ".token" | tr -d "\"")
