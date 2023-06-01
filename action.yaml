@@ -1,6 +1,6 @@
 # action.yml
 name: 'OWASP Dependency Track'
-description: 'Create SBOM and upload to OWASP Dependency Track'
+description: 'Generate SBOM and upload to OWASP Dependency Track'
 branding:
   icon: 'check-square'
   color: 'green'
