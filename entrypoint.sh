@@ -6,7 +6,7 @@ LANGUAGE=$3
 DELETE=$4
 NPM_TOKEN=$5
 NODE_VERSION=$6
-#PY_VERSION=$7
+PY_VERSION=$7
 
 INSECURE="--insecure"
 
@@ -88,8 +88,8 @@ case $LANGUAGE in
         command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH" >> ~/.profile
         eval "$(pyenv init -)" >> ~/.profile
 
-        pyenv install 3.9.7
-        pyenv global 3.9.7
+        pyenv install $PY_VERSION
+        pyenv global $PY_VERSION
 
         echo "[*] Finding all the requirements.txt files..."
         # output and input filenames must be distinct or we get an infinite loop
