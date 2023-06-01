@@ -30,6 +30,6 @@ jobs:
         uses:  FuzzyGophers/action-owasp-dependecy-track@main
         with:
           url: 'https://deptrack.example.com'
-          key: '${{ secrets.SECRET_OWASP_DT_KEY_BACKEND }}'
-          npm_token: '${{ secrets.SECRET_OWASP_NPM_TOKEN }}'
+          key: '${{ secrets.OWASP_DT_KEY_BACKEND }}'
+          npm_token: '${{ secrets.OWASP_NPM_TOKEN }}'
           language: 'golang'
